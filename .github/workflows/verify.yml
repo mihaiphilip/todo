@@ -27,7 +27,7 @@ jobs:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
-      - name: Setup node
+      - name: Setup Node
         uses: actions/setup-node@v1
         with:
           node-version: 13.8.0
@@ -44,21 +44,21 @@ jobs:
           path: _build
           key: ${{ runner.os }}-build-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
-      - name: Find npm cache location
-        id: npm-cache
-        run: echo "::set-output name=dir::$(npm cache dir)"
+      - name: Find yarn cache location
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
 
       - uses: actions/cache@v1
         with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-npm-
+            ${{ runner.os }}-yarn-
 
       - name: Install deps
         run: |
           mix deps.get
-          (cd assets && npm run)
+          (cd assets && yarn)
 
       - run: mix format --check-formatted
       - run: mix test
