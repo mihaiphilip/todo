@@ -44,3 +44,21 @@ jobs:
           path: _build
           key: ${{ runner.os }}-build-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
 
+      - name: Find npm cache location
+        id: npm-cache
+        run: echo "::set-output name=dir::$(npm cache dir)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install deps
+        run: |
+          mix deps.get
+          (cd assets && npm run)
+
+      - run: mix format --check-formatted
+      - run: mix test
